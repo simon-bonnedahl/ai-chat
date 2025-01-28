@@ -1,62 +1,31 @@
-import Image from "next/image";
+import { cookies } from 'next/headers';
 
-import { Chat } from "@/components/chat"
-import { Settings } from "@/components/settings"
+import { Chat } from '@/components/chat';
+import { DEFAULT_MODEL_NAME, models } from '@/lib/ai/models';
+import { generateUUID } from '@/lib/utils';
+import { DataStreamHandler } from '@/components/data-stream-handler';
 
-export default function Home() {
+export default async function Page() {
+  const id = generateUUID();
+
+  const cookieStore = await cookies();
+  const modelIdFromCookie = cookieStore.get('model-id')?.value;
+
+  const selectedModelId =
+    models.find((model) => model.id === modelIdFromCookie)?.id ||
+    DEFAULT_MODEL_NAME;
+
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-      <main className="flex-1">
-        <Chat />
-        <Settings />
-      </main>
-      <footer className="flex gap-6 flex-wrap items-center justify-center p-4">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  )
+    <>
+      <Chat
+        key={id}
+        id={id}
+        initialMessages={[]}
+        selectedModelId={selectedModelId}
+        selectedVisibilityType="private"
+        isReadonly={false}
+      />
+      <DataStreamHandler id={id} />
+    </>
+  );
 }
